@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 import os
+import pandas as pd
+from datetime import datetime
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
@@ -33,10 +35,21 @@ id_count = np.zeros(len(names))
 # Data storage for confidence graph
 confidences = []
 
+# Excel setup
+excel_file = 'Face_Records.xlsx'
+if not os.path.exists(excel_file):
+    df = pd.DataFrame(columns=['Name/Date', datetime.now().strftime('%Y-%m-%d')])
+    df.to_excel(excel_file, index=False)
+else:
+    df = pd.read_excel(excel_file)
+
+# Set to keep track of recognized faces for the day
+recognized_faces_set = set(df['Name/Date'])
+
 def init():
     ax1.set_xlim(0, 50)
     ax1.set_ylim(0, 100)
-    ax2.set_ylim(0, 1.1 * max(id_count))
+    ax2.set_ylim(0, len(names))
     return []
 
 def update(frame):
@@ -49,7 +62,7 @@ def update(frame):
 
     ax2.clear()
     ax2.bar(names, id_count, color='blue')
-    ax2.set_ylim(0, 1.1 * max(id_count))
+    ax2.set_ylim(0, len(names))
     return []
 
 ani = FuncAnimation(fig, update, init_func=init, blit=True, interval=100)
@@ -83,7 +96,15 @@ while True:
         if name_id in names:
             id_index = names.index(name_id)
             id_count[id_index] += 1
-        confidences.append(100 - confidence)
+            confidences.append(100 - confidence)
+
+            # Log the attendance if the face has not been recorded today
+            if name_id not in recognized_faces_set:
+                recognized_faces_set.add(name_id)
+                date_str = datetime.now().strftime('%Y-%m-%d')
+                new_record = pd.DataFrame({'Name/Date': [name_id], date_str: ['Present']})
+                df = pd.concat([df, new_record], ignore_index=True)
+                df.to_excel(excel_file, index=False)
 
     cv2.imshow('camera', img)
 
@@ -94,4 +115,5 @@ while True:
     plt.pause(0.01)
 
 print("\n [INFO] Exiting Program ...")
-cam
+cam.release()
+cv2.destroyAllWindows()
