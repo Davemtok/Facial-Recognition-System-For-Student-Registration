@@ -8,7 +8,7 @@ from matplotlib.animation import FuncAnimation
 
 # Initialize the face recognizer and load the trained model
 recognizer = cv2.face.LBPHFaceRecognizer_create()
-recognizer.read('trainer/trainer.yml')
+recognizer.read('trainer/best_trained_model.yml')
 
 # Load the pre-trained face detection model
 faceCascade = cv2.CascadeClassifier("Cascades/haarcascade_frontalface_default.xml")
@@ -17,7 +17,7 @@ faceCascade = cv2.CascadeClassifier("Cascades/haarcascade_frontalface_default.xm
 font = cv2.FONT_HERSHEY_SIMPLEX
 
 # Names corresponding to the IDs, adjust as needed
-names = ['None', 'David', 'Yazeed', 'Mum']
+names = ['None', 'David','Ninja']
 
 # Initialize and start real-time video capture
 cam = cv2.VideoCapture(0)
